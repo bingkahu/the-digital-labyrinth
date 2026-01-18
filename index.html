@@ -3,44 +3,67 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Digital Labyrinth — Graphics Engine v3</title>
+<title>Digital Labyrinth — Stable v4</title>
 <style>
   :root {
-    --bg: #060913; --text: #e6e9ff; --muted: #aab0d6;
-    --accent: #6c8cff; --accent2: #ff7a59; --good: #3ecf8e; --bad: #ff5c5c; --gold: #ffd166;
+    --bg: #0b0f1a; --panel: #12172b; --panel2: #0f1324;
+    --text: #e6e9ff; --muted: #aab0d6; --accent: #6c8cff; --accent2: #ff7a59;
+    --good: #3ecf8e; --bad: #ff5c5c; --gold: #ffd166;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; background: var(--bg); color: var(--text); }
-  canvas { display: block; width: 100vw; height: 100vh; }
-  .ui {
-    position: fixed; left: 0; right: 0; top: 0; padding: 0.6rem 0.8rem; display: flex; gap: 0.6rem; align-items: center; justify-content: space-between;
-    background: linear-gradient(180deg, rgba(108,140,255,0.15), transparent); z-index: 10;
+  body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; background: var(--bg); color: var(--text); }
+  .topbar {
+    position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 0.8rem; background: linear-gradient(180deg, rgba(108,140,255,0.12), rgba(0,0,0,0));
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
-  .ui .group { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
-  .ui label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); }
-  .ui input, .ui select, .ui button {
-    padding: 0.5rem 0.6rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: #0f1324; color: var(--text);
+  .group { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: 0.2px; }
+  button, input, select {
+    padding: 0.5rem 0.7rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+    background: var(--panel); color: var(--text);
   }
-  .ui button { cursor: pointer; background: linear-gradient(180deg, #1b2140, #12162e); border: 1px solid rgba(108,140,255,0.35); }
-  .ui button:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,140,255,0.15); }
-  .hud {
-    position: fixed; left: 0; right: 0; bottom: 0; padding: 0.6rem 0.8rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem;
-    background: linear-gradient(0deg, rgba(108,140,255,0.15), transparent); z-index: 10;
+  button { cursor: pointer; background: linear-gradient(180deg, #1b2140, #12162e); border: 1px solid rgba(108,140,255,0.35); }
+  button:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,140,255,0.15); }
+  .layout {
+    display: grid; grid-template-columns: 320px 1fr; gap: 0.8rem; padding: 0.8rem; min-height: calc(100vh - 56px);
   }
-  .hud .card { background: #0f1324; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.6rem; }
-  .hud .bar { height: 12px; border-radius: 999px; background: #0b0e1d; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
-  .hud .fill { height: 100%; width: 0%; transition: width 0.15s ease; }
-  .hud .fill.energy { background: linear-gradient(90deg, var(--good), var(--bad)); }
-  .hud .fill.progress { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-  .mobile { position: fixed; right: 0.6rem; bottom: 4.8rem; display: none; gap: 0.6rem; z-index: 10; }
-  .mobile button { padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: #121735; color: var(--text); }
-  @media (max-width: 800px) { .mobile { display: flex; } }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel2); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.8rem;
+  }
+  .panel h3 { margin: 0 0 0.6rem 0; font-size: 16px; color: var(--muted); }
+  .controls { display: grid; gap: 0.6rem; }
+  .controls .row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .big { font-size: 18px; padding: 0.8rem 1rem; }
+  .status { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .card { background: #0f1324; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.6rem; }
+  .bar { height: 12px; border-radius: 999px; background: #0b0e1d; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+  .fill { height: 100%; width: 0%; transition: width 0.15s ease; }
+  .fill.energy { background: linear-gradient(90deg, var(--good), var(--bad)); }
+  .fill.progress { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .canvasWrap { position: relative; background: #0b0e1d; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 70vh; }
+  .overlay {
+    position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.6));
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .overlay .box {
+    background: rgba(18, 23, 43, 0.9); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1rem; max-width: 560px; text-align: center;
+  }
+  .overlay h2 { margin: 0 0 0.4rem 0; }
+  .overlay p { color: var(--muted); }
+  .mobile {
+    position: fixed; right: 0.8rem; bottom: 0.8rem; display: flex; gap: 0.6rem; z-index: 30;
+  }
+  @media (min-width: 900px) { .mobile { display: none; } }
 </style>
 </head>
 <body>
-  <div class="ui">
+  <div class="topbar">
     <div class="group">
-      <strong>Digital Labyrinth — Graphics Engine v3</strong>
+      <div class="brand">Digital Labyrinth — Stable v4</div>
       <button id="btnMenu">Menu</button>
       <button id="btnPlay">Play</button>
       <button id="btnPause">Pause</button>
@@ -48,8 +71,8 @@
       <button id="btnAuto">Auto</button>
     </div>
     <div class="group">
-      <label>Rooms<input type="number" id="rooms" value="100" min="50" max="500" /></label>
-      <label>Energy<input type="number" id="energy" value="5000" min="500" max="20000" /></label>
+      <label>Rooms <input type="number" id="rooms" value="100" min="50" max="500" /></label>
+      <label>Energy <input type="number" id="energy" value="5000" min="500" max="20000" /></label>
       <label>Mode
         <select id="mode">
           <option value="mercy">Mercy Rule</option>
@@ -57,26 +80,62 @@
           <option value="insane">Insane</option>
         </select>
       </label>
-      <label>Seed<input type="text" id="seed" placeholder="optional" /></label>
+      <label>Seed <input type="text" id="seed" placeholder="optional" /></label>
       <button id="btnShare">Share</button>
     </div>
   </div>
 
-  <canvas id="game"></canvas>
+  <div class="layout">
+    <div class="panel">
+      <h3>Controls</h3>
+      <div class="controls">
+        <div class="row">
+          <button class="big" id="flipOnce">Flip once</button>
+          <button id="flip10">Flip ×10</button>
+          <button id="flip100">Flip ×100</button>
+          <button id="flip1000">Flip ×1000</button>
+        </div>
+        <div class="row">
+          <button id="dashL">Dash ←</button>
+          <button id="dashR">Dash →</button>
+          <button id="clearSeed">Clear seed</button>
+        </div>
+      </div>
 
-  <div class="hud">
-    <div class="card"><strong>Position:</strong> <span id="pos">1</span> / <span id="posMax">100</span></div>
-    <div class="card"><strong>Energy:</strong> <span id="eng">5000</span></div>
-    <div class="card"><strong>Fails:</strong> <span id="fails">0</span></div>
-    <div class="card"><strong>Heads %:</strong> <span id="pheads">50%</span></div>
-    <div class="card"><strong>Flips:</strong> <span id="flips">0</span></div>
-    <div class="card"><strong>Combo:</strong> <span id="combo">0</span></div>
-    <div class="card"><strong>Streak:</strong> <span id="streak">0</span></div>
-    <div class="card"><strong>Progress</strong><div class="bar"><div class="fill progress" id="barProgress"></div></div></div>
-    <div class="card"><strong>Energy</strong><div class="bar"><div class="fill energy" id="barEnergy"></div></div></div>
-    <div class="card"><strong>Power-ups:</strong> <span id="powers">None</span></div>
-    <div class="card"><strong>Obstacles:</strong> <span id="obsts">None</span></div>
-    <div class="card"><strong>Boss Gate:</strong> <span id="boss">Locked</span></div>
+      <h3>Status</h3>
+      <div class="status">
+        <div class="card"><strong>Position:</strong> <span id="pos">1</span> / <span id="posMax">100</span></div>
+        <div class="card"><strong>Energy:</strong> <span id="eng">5000</span></div>
+        <div class="card"><strong>Fails:</strong> <span id="fails">0</span></div>
+        <div class="card"><strong>Heads %:</strong> <span id="pheads">50%</span></div>
+        <div class="card"><strong>Flips:</strong> <span id="flips">0</span></div>
+        <div class="card"><strong>Combo:</strong> <span id="combo">0</span></div>
+        <div class="card"><strong>Streak:</strong> <span id="streak">0</span></div>
+        <div class="card"><strong>Power-ups:</strong> <span id="powers">None</span></div>
+        <div class="card"><strong>Obstacles:</strong> <span id="obsts">None</span></div>
+        <div class="card"><strong>Boss Gate:</strong> <span id="boss">Locked</span></div>
+        <div class="card">
+          <strong>Progress</strong>
+          <div class="bar"><div class="fill progress" id="barProgress"></div></div>
+        </div>
+        <div class="card">
+          <strong>Energy</strong>
+          <div class="bar"><div class="fill energy" id="barEnergy"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel canvasWrap">
+      <canvas id="game"></canvas>
+      <div class="overlay show" id="overlay">
+        <div class="box">
+          <h2>Welcome to the Labyrinth</h2>
+          <p>Press <strong>Play</strong> to start. Use <strong>Space</strong> to flip, <strong>←/→</strong> or <strong>A/D</strong> to dash. Or hit the big <strong>Flip once</strong> button.</p>
+          <p>Modes: Mercy (pity increases Heads), Fixed (80% Heads, −5 rooms on Tails), Insane (chaos).</p>
+          <button id="overlayPlay">Play now</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="mobile">
@@ -86,393 +145,63 @@
   </div>
 
 <script>
-/* =========================
-   RNG & Audio
-   ========================= */
+/* ========= RNG ========= */
 function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
 function hashSeed(s){let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0;}return h;}
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function beep(freq=880,dur=0.08,type="sine",gain=0.03){
-  const osc=audioCtx.createOscillator(), g=audioCtx.createGain();
-  osc.type=type; osc.frequency.value=freq; g.gain.value=gain;
-  osc.connect(g); g.connect(audioCtx.destination); osc.start(); setTimeout(()=>osc.stop(), dur*1000);
-}
-const SFX = {
-  heads(){beep(880,0.06,"triangle",0.05);},
-  tails(){beep(220,0.08,"sawtooth",0.06);},
-  win(){beep(1200,0.12,"square",0.06); setTimeout(()=>beep(1500,0.12,"square",0.06),120);},
-  hit(){beep(160,0.06,"square",0.07);},
-  power(){beep(1000,0.06,"sine",0.05);},
-  menu(){beep(600,0.06,"sine",0.04);}
-};
-let musicInterval=null;
-function startMusic(){ if(musicInterval) return; musicInterval=setInterval(()=>beep(240,0.2,"sine",0.02), 1200); }
-function stopMusic(){ if(musicInterval){ clearInterval(musicInterval); musicInterval=null; } }
 
-/* =========================
-   Canvas & Camera
-   ========================= */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-let W=window.innerWidth, H=window.innerHeight;
-function resize(){ W=window.innerWidth; H=window.innerHeight; canvas.width=W; canvas.height=H; resizeBuffers(); initParallax(true); }
+/* ========= Canvas ========= */
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+let W=0,H=0;
+function resize(){ const rect=canvas.parentElement.getBoundingClientRect(); W=Math.floor(rect.width); H=Math.floor(Math.max(320, rect.height)); canvas.width=W; canvas.height=H; }
 window.addEventListener("resize", resize); resize();
 
-const Camera = {
-  x:0, y:0, zoom:1, shakeT:0, shakeMag:0,
-  apply(){
-    ctx.save();
-    ctx.translate(W/2, H/2);
-    ctx.scale(this.zoom, this.zoom);
-    ctx.translate(-W/2, -H/2);
-    if(this.shakeT>0){ this.shakeT-=1/60; const dx=(Math.random()-0.5)*this.shakeMag; const dy=(Math.random()-0.5)*this.shakeMag; ctx.translate(dx,dy); }
-  },
+/* ========= Camera ========= */
+const Camera={ zoom:1, shakeT:0, shakeMag:0,
+  apply(){ ctx.save(); ctx.translate(W/2,H/2); ctx.scale(this.zoom,this.zoom); ctx.translate(-W/2,-H/2);
+    if(this.shakeT>0){ this.shakeT-=1/60; ctx.translate((Math.random()-0.5)*this.shakeMag,(Math.random()-0.5)*this.shakeMag); } },
   reset(){ ctx.restore(); },
-  shake(mag=8,time=0.2){ this.shakeMag=mag; this.shakeT=time; },
-  zoomTo(z, dur=0.3){
-    const start=this.zoom, diff=z-start, t0=performance.now();
-    const anim=()=>{ const t=(performance.now()-t0)/ (dur*1000); if(t>=1){ this.zoom=z; return; } this.zoom=start+diff*(1-Math.pow(1-t,3)); requestAnimationFrame(anim); };
-    anim();
-  }
+  shake(m=8,t=0.2){ this.shakeMag=m; this.shakeT=t; },
+  zoomTo(z,d=0.3){ const s=this.zoom, diff=z-s, t0=performance.now(); const anim=()=>{ const t=(performance.now()-t0)/(d*1000); if(t>=1){ this.zoom=z; return; } this.zoom=s+diff*(1-Math.pow(1-t,3)); requestAnimationFrame(anim); }; anim(); }
 };
 
-/* =========================
-   Offscreen Scene & Bloom Pyramid
-   ========================= */
-const scene = document.createElement("canvas");
-const bright = document.createElement("canvas");
-const levels = []; // downsampled bloom levels
-let sCtx = scene.getContext("2d");
-let bCtx = bright.getContext("2d");
-
-function resizeBuffers(){
-  scene.width=W; scene.height=H;
-  bright.width=W; bright.height=H;
-  sCtx = scene.getContext("2d");
-  bCtx = bright.getContext("2d");
-  // Build pyramid: 4 levels (W/2, W/4, W/8, W/16)
-  levels.length=0;
-  let w=W, h=H;
-  for(let i=0;i<4;i++){
-    w=Math.max(1, Math.floor(w/2));
-    h=Math.max(1, Math.floor(h/2));
-    const c=document.createElement("canvas");
-    c.width=w; c.height=h;
-    levels.push({c, ctx:c.getContext("2d")});
-  }
-}
-
-/* =========================
-   Gaussian Kernel & Blur
-   ========================= */
-function gaussianKernel(radius){
-  const sigma = radius/2;
-  const kernel = [];
-  let sum = 0;
-  for(let i=-radius;i<=radius;i++){
-    const v = Math.exp(-(i*i)/(2*sigma*sigma));
-    kernel.push(v); sum+=v;
-  }
-  return kernel.map(v=>v/sum);
-}
-const BLOOM_RADIUS = 6;
-const KERNEL = gaussianKernel(BLOOM_RADIUS);
-
-function blurPass(srcCanvas, dstCtx, horizontal=true){
-  dstCtx.clearRect(0,0,dstCtx.canvas.width,dstCtx.canvas.height);
-  const step = 1;
-  const Wd = dstCtx.canvas.width, Hd = dstCtx.canvas.height;
-  if(horizontal){
-    for(let y=0;y<Hd;y+=step){
-      for(let k=-BLOOM_RADIUS;k<=BLOOM_RADIUS;k++){
-        const w = KERNEL[k+BLOOM_RADIUS];
-        dstCtx.globalAlpha = w;
-        dstCtx.drawImage(srcCanvas, k, y, Wd, step, 0, y, Wd, step);
-      }
-    }
-  } else {
-    for(let x=0;x<Wd;x+=step){
-      for(let k=-BLOOM_RADIUS;k<=BLOOM_RADIUS;k++){
-        const w = KERNEL[k+BLOOM_RADIUS];
-        dstCtx.globalAlpha = w;
-        dstCtx.drawImage(srcCanvas, x, k, step, Hd, x, 0, step, Hd);
-      }
-    }
-  }
-  dstCtx.globalAlpha = 1;
-}
-
-/* =========================
-   Bright-pass (threshold)
-   ========================= */
-function brightPass(srcCtx, dstCtx, threshold=180){
-  const w=srcCtx.canvas.width, h=srcCtx.canvas.height;
-  const img = srcCtx.getImageData(0,0,w,h);
-  const data = img.data;
-  for(let i=0;i<data.length;i+=4){
-    const r=data[i], g=data[i+1], b=data[i+2];
-    const luma = 0.2126*r + 0.7152*g + 0.0722*b;
-    if(luma < threshold){
-      data[i]=data[i+1]=data[i+2]=0; data[i+3]=0;
-    } else {
-      // keep bright pixels, soften alpha
-      data[i+3] = Math.min(255, data[i+3]);
-    }
-  }
-  dstCtx.putImageData(img,0,0);
-}
-
-/* =========================
-   Parallax Background (depth layers)
-   ========================= */
-const parallax = [
-  {stars:[], speed: 6, color:"#0f1a3a", count:160, size:[0.6,1.6], alpha:0.6},
-  {stars:[], speed:12, color:"#1b2a4f", count:140, size:[0.8,2.2], alpha:0.7},
-  {stars:[], speed:20, color:"#27407a", count:100, size:[1.0,2.8], alpha:0.8},
-];
-function initParallax(reset=false){
-  if(reset){ parallax.forEach(l=>l.stars.length=0); }
-  parallax.forEach(l=>{
-    if(l.stars.length===0){
-      for(let i=0;i<l.count;i++){
-        l.stars.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*(l.size[1]-l.size[0])+l.size[0]});
-      }
-    }
-  });
-}
-function renderParallax(dt){
-  parallax.forEach(l=>{
-    ctx.save(); ctx.globalAlpha=l.alpha;
-    l.stars.forEach(s=>{
-      s.x -= l.speed*dt; if(s.x<0) s.x=W;
-      ctx.fillStyle=l.color; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
-    });
-    ctx.restore();
-  });
-}
-function renderScanlines(){
-  ctx.save();
-  ctx.globalAlpha=0.06;
-  for(let y=0;y<H;y+=2){ ctx.fillStyle="#000"; ctx.fillRect(0,y,W,1); }
-  ctx.restore();
-}
-
-/* =========================
-   Particles (color morph)
-   ========================= */
-const particles=[];
-function lerp(a,b,t){ return a+(b-a)*t; }
-function lerpColor(c1,c2,t){
-  const a = c1.match(/\d+/g).map(Number), b = c2.match(/\d+/g).map(Number);
-  return `rgba(${Math.round(lerp(a[0],b[0],t))},${Math.round(lerp(a[1],b[1],t))},${Math.round(lerp(a[2],b[2],t))},${lerp(a[3]||1,b[3]||1,t)})`;
-}
-function spawnParticle(x,y,opts={}){
-  particles.push({
-    x,y,
-    vx:opts.vx||((Math.random()-0.5)*140),
-    vy:opts.vy||((Math.random()-0.5)*140),
-    life:opts.life||0.7,
-    maxLife:opts.life||0.7,
-    r:opts.r||3,
-    c1:opts.c1||"rgba(255,209,102,1)",
-    c2:opts.c2||"rgba(108,140,255,0.2)",
-    gravity:opts.gravity||30
-  });
-}
-function updateParticles(dt){
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.life-=dt; if(p.life<=0){ particles.splice(i,1); continue; }
-    p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=p.gravity*dt;
-  }
-}
-function renderParticlesTo(bufferCtx){
-  particles.forEach(p=>{
-    const t = 1 - (p.life/p.maxLife);
-    const col = lerpColor(p.c1, p.c2, t);
-    bufferCtx.save();
-    bufferCtx.globalAlpha=Math.max(0,p.life/p.maxLife);
-    bufferCtx.shadowColor=col; bufferCtx.shadowBlur=14;
-    bufferCtx.fillStyle=col; bufferCtx.beginPath(); bufferCtx.arc(p.x,p.y,p.r,0,Math.PI*2); bufferCtx.fill();
-    bufferCtx.restore();
-  });
-}
-
-/* =========================
-   Avatar (layered glow + trail)
-   ========================= */
-class Avatar {
-  constructor(){ this.x=0; this.y=0; this.r=10; this.color="#ffd166"; this.trail=[]; }
-  set(x,y){ this.x=x; this.y=y; this.trail.push({x,y, life:0.55}); if(this.trail.length>44) this.trail.shift(); }
-  renderTo(bufferCtx){
-    // Trail with alpha decay
-    this.trail.forEach(t=>{
-      bufferCtx.save(); bufferCtx.globalAlpha=Math.max(0,t.life);
-      bufferCtx.fillStyle="rgba(255,209,102,0.25)";
-      bufferCtx.beginPath(); bufferCtx.arc(t.x,t.y,this.r*0.7,0,Math.PI*2); bufferCtx.fill();
-      bufferCtx.restore(); t.life-=1/120;
-    });
-    // Layered glow
-    bufferCtx.save();
-    bufferCtx.shadowColor=this.color; bufferCtx.shadowBlur=28;
-    bufferCtx.fillStyle=this.color; bufferCtx.beginPath(); bufferCtx.arc(this.x,this.y,this.r,0,Math.PI*2); bufferCtx.fill();
-    bufferCtx.shadowBlur=52; bufferCtx.globalAlpha=0.35;
-    bufferCtx.beginPath(); bufferCtx.arc(this.x,this.y,this.r*1.9,0,Math.PI*2); bufferCtx.fill();
-    bufferCtx.restore();
-  }
-}
-const AvatarSprite = new Avatar();
-
-/* =========================
-   Boss Gate (pulse, crack, shatter)
-   ========================= */
-const BossGate = {
-  crackT:0, shatter:false,
-  pulse(t){ return 1 + Math.sin(t*4)*0.02; },
-  triggerCrack(){
-    this.crackT=0.6; this.shatter=false;
-    Camera.shake(12,0.3);
-    for(let i=0;i<48;i++) spawnParticle(Game.goalX, Game.goalY, {vx:(Math.random()-0.5)*240, vy:(Math.random()-0.5)*240, c1:"rgba(255,209,102,1)", c2:"rgba(255,122,89,0.2)", life:0.85});
-  },
-  triggerShatter(){
-    this.shatter=true; this.crackT=0;
-    Camera.zoomTo(1.12,0.4); setTimeout(()=>Camera.zoomTo(1,0.4),500);
-    for(let i=0;i<120;i++) spawnParticle(Game.goalX, Game.goalY, {vx:(Math.random()-0.5)*300, vy:(Math.random()-0.5)*300, c1:"rgba(255,209,102,1)", c2:"rgba(108,140,255,0.2)", life:1.1});
-  },
-  renderTo(bufferCtx, x, y){
-    const r = 88;
-    const g=bufferCtx.createRadialGradient(x,y,10,x,y,r);
-    g.addColorStop(0,"rgba(255,209,102,0.35)"); g.addColorStop(1,"rgba(255,209,102,0)");
-    bufferCtx.fillStyle=g; bufferCtx.beginPath(); bufferCtx.arc(x,y,r,0,Math.PI*2); bufferCtx.fill();
-
-    bufferCtx.save();
-    bufferCtx.shadowColor="#ffd166"; bufferCtx.shadowBlur=18;
-    bufferCtx.strokeStyle="#ffd166"; bufferCtx.lineWidth=2;
-    const s = this.pulse(performance.now()/1000);
-    bufferCtx.beginPath(); bufferCtx.arc(x,y, 28*s, 0, Math.PI*2); bufferCtx.stroke();
-    bufferCtx.beginPath(); bufferCtx.arc(x,y, 46*s, 0, Math.PI*2); bufferCtx.stroke();
-    bufferCtx.restore();
-
-    if(this.crackT>0){
-      bufferCtx.save();
-      bufferCtx.globalAlpha=this.crackT;
-      bufferCtx.strokeStyle="#ff7a59"; bufferCtx.lineWidth=3;
-      bufferCtx.beginPath(); bufferCtx.moveTo(x-18,y-8); bufferCtx.lineTo(x+12,y+6); bufferCtx.stroke();
-      bufferCtx.beginPath(); bufferCtx.moveTo(x+20,y-10); bufferCtx.lineTo(x-10,y+14); bufferCtx.stroke();
-      bufferCtx.restore();
-      this.crackT=Math.max(0,this.crackT-1/60);
-    }
-  }
-};
-
-/* =========================
-   Game Logic (unchanged)
-   ========================= */
-class Labyrinth {
-  constructor({rooms=100, energy=5000, mode="mercy", seed=null}={}) {
-    this.rooms=rooms; this.energyMax=energy; this.mode=mode; this.seed=seed;
-    this.reset();
-  }
-  reset(){
-    this.position=1; this.energy=this.energyMax; this.fails=0; this.flips=0; this.done=false; this.win=false;
+/* ========= Game Logic ========= */
+class Labyrinth{
+  constructor({rooms=100,energy=5000,mode="mercy",seed=null}={}){ this.rooms=rooms; this.energyMax=energy; this.mode=mode; this.seed=seed; this.reset(); }
+  reset(){ this.position=1; this.energy=this.energyMax; this.fails=0; this.flips=0; this.done=false; this.win=false;
     this.longestStreak=0; this.currentStreak=0; this.combo=0; this.bossLocked=true; this.gravityActive=false;
-    this.powerups=[]; this.obstacles=[]; this.rng=this.seed?mulberry32(hashSeed(this.seed)):Math.random;
-    this.spawnObstacles(); this.spawnPowerups();
-  }
-  get pHeads(){
-    if(this.mode==="mercy") return Math.min(0.5+0.01*this.fails,1.0);
-    if(this.mode==="fixed") return 0.8;
-    if(this.mode==="insane") return 0.6;
-    return 0.5;
-  }
-  spawnObstacles(){
-    this.obstacles = [
-      {type:"trap", pos: Math.floor(this.rooms*0.2)},
-      {type:"trap", pos: Math.floor(this.rooms*0.45)},
-      {type:"gravity", pos: Math.floor(this.rooms*0.7)},
-    ];
-  }
-  spawnPowerups(){
-    this.powerups = [
-      {type:"shield", pos: Math.floor(this.rooms*0.1)},
-      {type:"turbo", pos: Math.floor(this.rooms*0.35)},
-      {type:"lucky", pos: Math.floor(this.rooms*0.6)},
-    ];
-  }
+    this.powerups=[]; this.obstacles=[]; this.rng=this.seed?mulberry32(hashSeed(this.seed)):Math.random; this.spawnObstacles(); this.spawnPowerups(); }
+  get pHeads(){ if(this.mode==="mercy") return Math.min(0.5+0.01*this.fails,1.0); if(this.mode==="fixed") return 0.8; if(this.mode==="insane") return 0.6; return 0.5; }
+  spawnObstacles(){ this.obstacles=[ {type:"trap",pos:Math.floor(this.rooms*0.2)}, {type:"trap",pos:Math.floor(this.rooms*0.45)}, {type:"gravity",pos:Math.floor(this.rooms*0.7)} ]; }
+  spawnPowerups(){ this.powerups=[ {type:"shield",pos:Math.floor(this.rooms*0.1)}, {type:"turbo",pos:Math.floor(this.rooms*0.35)}, {type:"lucky",pos:Math.floor(this.rooms*0.6)} ]; }
   powerActive(type){ return this.powerups.some(p=>p.pos===-1 && p.type===type); }
   consumePower(type){ const i=this.powerups.findIndex(p=>p.pos===-1 && p.type===type); if(i>=0) this.powerups.splice(i,1); }
-  applyPowerups(){
-    const idx=this.powerups.findIndex(p=>p.pos===this.position);
-    if(idx>=0){ const p=this.powerups.splice(idx,1)[0]; this.powerups.push({type:p.type,pos:-1}); SFX.power(); Camera.shake(4,0.1);
-      for(let i=0;i<12;i++) spawnParticle(AvatarSprite.x, AvatarSprite.y, {vx:(Math.random()-0.5)*140, vy:(Math.random()-0.5)*140, c1:"rgba(108,140,255,1)", c2:"rgba(108,140,255,0.2)", life:0.55});
-    }
-  }
-  applyObstacles(){
-    const here=this.obstacles.find(o=>o.pos===this.position);
-    if(!here) return;
-    if(here.type==="trap"){
-      if(this.powerActive("shield")) return;
-      SFX.hit(); Camera.shake(10,0.2);
-      for(let i=0;i<18;i++) spawnParticle(AvatarSprite.x, AvatarSprite.y, {vx:(Math.random()-0.5)*180, vy:(Math.random()-0.5)*180, c1:"rgba(255,122,89,1)", c2:"rgba(255,122,89,0.2)", life:0.7});
+  applyPowerups(){ const idx=this.powerups.findIndex(p=>p.pos===this.position); if(idx>=0){ const p=this.powerups.splice(idx,1)[0]; this.powerups.push({type:p.type,pos:-1}); Camera.shake(4,0.1); } }
+  applyObstacles(){ const here=this.obstacles.find(o=>o.pos===this.position); if(!here) return;
+    if(here.type==="trap"){ if(this.powerActive("shield")) return; Camera.shake(8,0.2);
       if(this.mode==="mercy"){ this.position=1; this.fails++; this.combo=0; this.currentStreak=0; }
       else if(this.mode==="fixed"){ this.position=Math.max(1,this.position-10); this.combo=0; this.currentStreak=0; }
       else { this.position=Math.floor(1+(this.seed?this.rng():Math.random())*this.rooms); this.combo=0; this.currentStreak=0; }
-    } else if(here.type==="gravity"){
-      this.gravityActive=true;
-    }
-  }
-  bossCheck(){
-    if(this.position>=this.rooms){
-      if(this.bossLocked){
-        if(this.combo>=10 || this.powerActive("lucky")){
-          this.bossLocked=false; this.consumePower("lucky");
-          BossGate.triggerShatter();
-          return true;
-        } else {
-          this.position=this.rooms-1; SFX.hit(); Camera.shake(8,0.2);
-          BossGate.triggerCrack();
-          return false;
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-  dash(dir){
-    if(this.done) return;
-    const cost=5; if(this.energy<cost) return;
-    this.energy-=cost;
-    const step=dir>0?3:-3;
-    this.position=Math.max(1,Math.min(this.rooms,this.position+step));
-    this.applyPowerups(); this.applyObstacles();
-    if(this.bossCheck()){ this.done=true; this.win=true; }
-  }
-  step(){
-    if(this.done) return;
-    const p=this.pHeads; const r=this.seed?this.rng():Math.random();
-    this.flips++; this.energy--;
-    if(r<p){
-      this.position++; this.currentStreak++; this.combo++; this.longestStreak=Math.max(this.longestStreak,this.currentStreak);
-      SFX.heads();
-      for(let i=0;i<10;i++) spawnParticle(AvatarSprite.x, AvatarSprite.y, {vx:(Math.random()-0.5)*120, vy:-Math.random()*120, c1:"rgba(255,209,102,1)", c2:"rgba(255,209,102,0.2)", life:0.6});
-    } else {
-      this.currentStreak=0; this.combo=0; SFX.tails();
+    } else if(here.type==="gravity"){ this.gravityActive=true; } }
+  bossCheck(){ if(this.position>=this.rooms){ if(this.bossLocked){ if(this.combo>=10 || this.powerActive("lucky")){ this.bossLocked=false; this.consumePower("lucky"); return true; } else { this.position=this.rooms-1; return false; } } return true; } return false; }
+  dash(dir){ if(this.done) return; const cost=5; if(this.energy<cost) return; this.energy-=cost; const step=dir>0?3:-3;
+    this.position=Math.max(1,Math.min(this.rooms,this.position+step)); this.applyPowerups(); this.applyObstacles(); if(this.bossCheck()){ this.done=true; this.win=true; } }
+  step(){ if(this.done) return; const p=this.pHeads; const r=this.seed?this.rng():Math.random(); this.flips++; this.energy--;
+    if(r<p){ this.position++; this.currentStreak++; this.combo++; this.longestStreak=Math.max(this.longestStreak,this.currentStreak); }
+    else { this.currentStreak=0; this.combo=0;
       if(this.mode==="mercy"){ this.position=1; this.fails++; }
       else if(this.mode==="fixed"){ const penalty=this.gravityActive?10:5; this.position=Math.max(1,this.position-penalty); }
       else { this.position=Math.floor(1+(this.seed?this.rng():Math.random())*this.rooms); }
-      this.gravityActive=false; Camera.shake(6,0.15);
+      this.gravityActive=false;
     }
     this.applyPowerups(); this.applyObstacles();
-    if(this.bossCheck()){ this.done=true; this.win=true; }
-    else if(this.energy<=0){ this.done=true; this.win=false; }
+    if(this.bossCheck()){ this.done=true; this.win=true; } else if(this.energy<=0){ this.done=true; this.win=false; }
   }
 }
 
-/* =========================
-   HUD (unchanged)
-   ========================= */
-const UI = {
-  els: {
+/* ========= HUD ========= */
+const UI={
+  els:{
     rooms:document.getElementById("rooms"), energy:document.getElementById("energy"), mode:document.getElementById("mode"), seed:document.getElementById("seed"),
     pos:document.getElementById("pos"), posMax:document.getElementById("posMax"), eng:document.getElementById("eng"), fails:document.getElementById("fails"),
     pheads:document.getElementById("pheads"), flips:document.getElementById("flips"), combo:document.getElementById("combo"), streak:document.getElementById("streak"),
@@ -498,153 +227,111 @@ const UI = {
   }
 };
 
-/* =========================
-   Game States & Loop
-   ========================= */
-const Game = {
-  state:"menu",
-  labyrinth:new Labyrinth(),
-  auto:false,
-  dt:0, last:performance.now(),
-  goalX:0, goalY:0,
-  update(t){
-    this.dt=(t-this.last)/1000; this.last=t;
-    if(this.state==="play"){
-      if(this.auto && !this.labyrinth.done){ this.labyrinth.step(); }
-      if(this.labyrinth.done){
-        this.state=this.labyrinth.win?"win":"lose";
-        if(this.labyrinth.win){ SFX.win(); Camera.zoomTo(1.12,0.4); setTimeout(()=>Camera.zoomTo(1,0.4),500); }
-      }
-    }
-    updateParticles(this.dt);
-  },
+/* ========= Game State ========= */
+const Game={ state:"menu", labyrinth:new Labyrinth(), auto:false, dt:0, last:performance.now(),
+  update(t){ this.dt=(t-this.last)/1000; this.last=t; if(this.state==="play"){ if(this.auto && !this.labyrinth.done){ this.labyrinth.step(); } if(this.labyrinth.done){ this.state=this.labyrinth.win?"win":"lose"; } } },
   render(){
-    ctx.clearRect(0,0,W,H);
-    Camera.apply();
-
-    // Parallax background
-    renderParallax(this.dt);
-
-    // Scene pass: draw track, cells, avatar, boss glow
-    sCtx.clearRect(0,0,W,H);
-    const margin=80, trackW=W-2*margin, trackH=110, trackX=margin, trackY=H/2-trackH/2;
-    sCtx.fillStyle="#0b0e1d"; sCtx.fillRect(trackX,trackY,trackW,trackH);
-
+    ctx.clearRect(0,0,W,H); Camera.apply();
+    const margin=24, trackW=W-2*margin, trackH=Math.min(160, Math.max(120, Math.floor(H*0.22))), trackX=margin, trackY=H/2-trackH/2;
+    // Track
+    ctx.fillStyle="#0f1324"; ctx.fillRect(trackX,trackY,trackW,trackH);
+    // Cells
     const cellW=trackW/this.labyrinth.rooms;
     for(let i=0;i<this.labyrinth.rooms;i++){
       const x=trackX+i*cellW, y=trackY;
       const isGoal=(i+1===this.labyrinth.rooms);
-      sCtx.save();
-      sCtx.shadowColor=isGoal?"#ffd166":"#6c8cff"; sCtx.shadowBlur=isGoal?25:12;
-      sCtx.fillStyle=isGoal?"#1f2546":"#12162e";
-      sCtx.fillRect(x+2,y+2,cellW-4,trackH-4);
-      sCtx.restore();
-
+      ctx.fillStyle=isGoal?"#1f2546":"#12162e";
+      ctx.fillRect(x+2,y+2,cellW-4,trackH-4);
+      // Obstacles
       if(this.labyrinth.obstacles.some(o=>o.pos===i+1)){
-        sCtx.save(); sCtx.shadowColor="#ff7a59"; sCtx.shadowBlur=12; sCtx.fillStyle="#2a1b1b";
-        sCtx.fillRect(x+cellW/2-8,y+trackH/2-8,16,16); sCtx.restore();
+        ctx.fillStyle="#2a1b1b"; ctx.fillRect(x+cellW/2-8,y+trackH/2-8,16,16);
       }
+      // Powerups
       if(this.labyrinth.powerups.some(p=>p.pos===i+1)){
-        sCtx.save(); sCtx.shadowColor="#3ecf8e"; sCtx.shadowBlur=12; sCtx.fillStyle="#1b2a1b";
-        sCtx.fillRect(x+cellW/2-8,y+trackH/2-8,16,16); sCtx.restore();
+        ctx.fillStyle="#1b2a1b"; ctx.fillRect(x+cellW/2-8,y+trackH/2-8,16,16);
       }
     }
-
-    // Goal lighting + boss gate
-    this.goalX = trackX+(this.labyrinth.rooms-1)*cellW+cellW/2;
-    this.goalY = trackY+trackH/2;
-    BossGate.renderTo(sCtx, this.goalX, this.goalY);
-
-    // Avatar easing to cell center
+    // Avatar
     const ax=trackX+(this.labyrinth.position-1)*cellW+cellW/2;
     const ay=trackY+trackH/2;
-    AvatarSprite.set(AvatarSprite.x + (ax-AvatarSprite.x)*0.25, AvatarSprite.y + (ay-AvatarSprite.y)*0.25);
-    AvatarSprite.renderTo(sCtx);
-
-    // Particles to scene
-    renderParticlesTo(sCtx);
-
-    // Bright-pass threshold
-    brightPass(sCtx, bCtx, 170);
-
-    // Downsample pyramid
-    let src = bright;
-    levels.forEach((lvl, i)=>{
-      const {c, ctx} = lvl;
-      ctx.clearRect(0,0,c.width,c.height);
-      ctx.drawImage(src, 0, 0, src.width, src.height, 0, 0, c.width, c.height);
-      // blur horizontal then vertical at each level
-      blurPass(c, ctx, true);
-      blurPass(c, ctx, false);
-      src = c;
-    });
-
-    // Upsample & composite glow
-    ctx.globalCompositeOperation="lighter";
-    for(let i=levels.length-1;i>=0;i--){
-      const {c} = levels[i];
-      ctx.drawImage(c, 0, 0, c.width, c.height, 0, 0, W, H);
-    }
-    ctx.globalCompositeOperation="source-over";
-    ctx.drawImage(scene,0,0);
-
+    drawAvatar(ax, ay);
+    // Boss gate glow
+    drawGoal(trackX+(this.labyrinth.rooms-1)*cellW+cellW/2, trackY+trackH/2, !this.labyrinth.bossLocked);
     // State overlays
-    if(this.state==="menu"){
-      drawText("Digital Labyrinth — Graphics Engine v3", W/2, H*0.25, 32, "#e6e9ff","center");
-      drawText("Space: Flip | ←/→ or A/D: Dash | M: Menu | P: Pause | R: Reset", W/2, H*0.3, 16, "#aab0d6","center");
-      drawText("Break the Boss Gate at Room 100 with a 10‑Heads combo or a Lucky Coin.", W/2, H*0.35, 16, "#aab0d6","center");
-    }
-    if(this.state==="win"){
-      drawText("VICTORY!", W/2, H*0.25, 40, "#3ecf8e","center");
-      drawText(`Room ${this.labyrinth.rooms} in ${this.labyrinth.flips} flips. Energy left: ${this.labyrinth.energy}.`, W/2, H*0.32, 18, "#e6e9ff","center");
-    }
-    if(this.state==="lose"){
-      drawText("OUT OF ENERGY", W/2, H*0.25, 40, "#ff5c5c","center");
-      drawText(`Reached Room ${this.labyrinth.position} after ${this.labyrinth.flips}.`, W/2, H*0.32, 18, "#e6e9ff","center");
-    }
-
-    renderScanlines();
+    if(Game.state==="menu"){ drawOverlayText("Press Play to start. Space to flip. ←/→ to dash."); }
+    if(Game.state==="win"){ drawOverlayText(`VICTORY — Room ${this.labyrinth.rooms} in ${this.labyrinth.flips} flips. Energy left: ${this.labyrinth.energy}.`); }
+    if(Game.state==="lose"){ drawOverlayText(`OUT OF ENERGY — Reached Room ${this.labyrinth.position} after ${this.labyrinth.flips} flips.`); }
     Camera.reset();
   }
 };
-function drawText(txt,x,y,size=16,color="#e6e9ff",align="left"){ ctx.fillStyle=color; ctx.font=`${size}px system-ui`; ctx.textAlign=align; ctx.fillText(txt,x,y); }
 
-/* =========================
-   Input (unchanged)
-   ========================= */
+/* ========= Simple visuals (stable) ========= */
+function drawAvatar(x,y){
+  ctx.save();
+  ctx.shadowColor= "#ffd166"; ctx.shadowBlur=18;
+  ctx.fillStyle="#ffd166"; ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawGoal(x,y,open){
+  ctx.save();
+  const g=ctx.createRadialGradient(x,y,10,x,y,60);
+  g.addColorStop(0, open?"rgba(62,207,142,0.35)":"rgba(255,209,102,0.35)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,60,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawOverlayText(text){
+  ctx.save();
+  ctx.fillStyle="rgba(0,0,0,0.35)"; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#e6e9ff"; ctx.font="20px system-ui"; ctx.textAlign="center";
+  ctx.fillText(text, W/2, H*0.25);
+  ctx.restore();
+}
+
+/* ========= Input ========= */
+function ensurePlay(){ if(Game.state==="menu"){ Game.state="play"; overlay.classList.remove("show"); } }
 window.addEventListener("keydown",(e)=>{
-  if(e.code==="Space"){ e.preventDefault(); if(Game.state==="menu"){ Game.state="play"; startMusic(); return; } if(Game.state!=="play") return; Game.labyrinth.step(); UI.updateHUD(); }
-  if(["ArrowLeft","KeyA"].includes(e.code)){ e.preventDefault(); if(Game.state!=="play") return; Game.labyrinth.dash(-1); Camera.shake(4,0.1); UI.updateHUD(); }
-  if(["ArrowRight","KeyD"].includes(e.code)){ e.preventDefault(); if(Game.state!=="play") return; Game.labyrinth.dash(1); UI.updateHUD(); }
-  if(e.code==="KeyM"){ Game.state="menu"; stopMusic(); SFX.menu(); }
+  if(e.code==="Space"){ e.preventDefault(); ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.step(); UI.updateHUD(); }
+  if(["ArrowLeft","KeyA"].includes(e.code)){ e.preventDefault(); ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(-1); UI.updateHUD(); }
+  if(["ArrowRight","KeyD"].includes(e.code)){ e.preventDefault(); ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(1); UI.updateHUD(); }
+  if(e.code==="KeyM"){ Game.state="menu"; overlay.classList.add("show"); }
   if(e.code==="KeyP"){ Game.state=Game.state==="pause"?"play":"pause"; }
   if(e.code==="KeyR"){ Game.labyrinth.reset(); UI.updateHUD(); }
 });
-document.getElementById("mFlip").addEventListener("click",()=>{ if(Game.state!=="play") return; Game.labyrinth.step(); UI.updateHUD(); });
-document.getElementById("mDashL").addEventListener("click",()=>{ if(Game.state!=="play") return; Game.labyrinth.dash(-1); UI.updateHUD(); });
-document.getElementById("mDashR").addEventListener("click",()=>{ if(Game.state!=="play") return; Game.labyrinth.dash(1); UI.updateHUD(); });
 
-/* =========================
-   Top Bar Controls (unchanged)
-   ========================= */
-document.getElementById("btnMenu").addEventListener("click",()=>{ Game.state="menu"; stopMusic(); SFX.menu(); });
-document.getElementById("btnPlay").addEventListener("click",()=>{ Game.state="play"; startMusic(); });
+/* ========= Buttons ========= */
+const overlay=document.getElementById("overlay");
+document.getElementById("overlayPlay").addEventListener("click",()=>{ Game.state="play"; overlay.classList.remove("show"); });
+
+document.getElementById("btnMenu").addEventListener("click",()=>{ Game.state="menu"; overlay.classList.add("show"); });
+document.getElementById("btnPlay").addEventListener("click",()=>{ Game.state="play"; overlay.classList.remove("show"); });
 document.getElementById("btnPause").addEventListener("click",()=>{ Game.state=Game.state==="pause"?"play":"pause"; });
 document.getElementById("btnReset").addEventListener("click",()=>{ Game.labyrinth.reset(); UI.updateHUD(); });
-document.getElementById("btnAuto").addEventListener("click",()=>{ Game.auto=!Game.auto; });
+document.getElementById("btnAuto").addEventListener("click",()=>{ ensurePlay(); Game.auto=!Game.auto; });
+
+document.getElementById("flipOnce").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.step(); UI.updateHUD(); });
+document.getElementById("flip10").addEventListener("click",()=>{ ensurePlay(); for(let i=0;i<10 && Game.state==="play" && !Game.labyrinth.done;i++){ Game.labyrinth.step(); } UI.updateHUD(); });
+document.getElementById("flip100").addEventListener("click",()=>{ ensurePlay(); for(let i=0;i<100 && Game.state==="play" && !Game.labyrinth.done;i++){ Game.labyrinth.step(); } UI.updateHUD(); });
+document.getElementById("flip1000").addEventListener("click",()=>{ ensurePlay(); for(let i=0;i<1000 && Game.state==="play" && !Game.labyrinth.done;i++){ Game.labyrinth.step(); } UI.updateHUD(); });
+
+document.getElementById("dashL").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(-1); UI.updateHUD(); });
+document.getElementById("dashR").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(1); UI.updateHUD(); });
+
+document.getElementById("mFlip").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.step(); UI.updateHUD(); });
+document.getElementById("mDashL").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(-1); UI.updateHUD(); });
+document.getElementById("mDashR").addEventListener("click",()=>{ ensurePlay(); if(Game.state!=="play") return; Game.labyrinth.dash(1); UI.updateHUD(); });
+
+document.getElementById("clearSeed").addEventListener("click",()=>{ document.getElementById("seed").value=""; Game.labyrinth.seed=null; Game.labyrinth.reset(); UI.updateHUD(); });
 
 document.getElementById("btnShare").addEventListener("click",()=>UI.share());
 
-document.getElementById("rooms").addEventListener("change",()=>{ const r=parseInt(document.getElementById("rooms").value,10)||100; Game.labyrinth.rooms=Math.max(50,Math.min(500,r)); Game.labyrinth.reset(); UI.updateHUD(); initParallax(true); resizeBuffers(); });
+document.getElementById("rooms").addEventListener("change",()=>{ const r=parseInt(document.getElementById("rooms").value,10)||100; Game.labyrinth.rooms=Math.max(50,Math.min(500,r)); Game.labyrinth.reset(); UI.updateHUD(); });
 document.getElementById("energy").addEventListener("change",()=>{ const e=parseInt(document.getElementById("energy").value,10)||5000; Game.labyrinth.energyMax=Math.max(500,Math.min(20000,e)); Game.labyrinth.reset(); UI.updateHUD(); });
 document.getElementById("mode").addEventListener("change",()=>{ Game.labyrinth.mode=document.getElementById("mode").value; Game.labyrinth.reset(); UI.updateHUD(); });
 document.getElementById("seed").addEventListener("change",()=>{ const s=(document.getElementById("seed").value||"").trim(); Game.labyrinth.seed=s||null; Game.labyrinth.reset(); UI.updateHUD(); });
 
-/* =========================
-   Init
-   ========================= */
+/* ========= Init ========= */
 (function init(){
-  initParallax();
   const u=new URL(window.location.href);
   const rooms=parseInt(u.searchParams.get("rooms")||"100",10);
   const energy=parseInt(u.searchParams.get("energy")||"5000",10);
@@ -658,14 +345,8 @@ document.getElementById("seed").addEventListener("change",()=>{ const s=(documen
   UI.updateHUD();
 })();
 
-/* =========================
-   Main Loop
-   ========================= */
-function loop(t){
-  Game.update(t);
-  if(Game.state!=="pause") Game.render();
-  requestAnimationFrame(loop);
-}
+/* ========= Loop ========= */
+function loop(t){ Game.update(t); if(Game.state!=="pause"){ Game.render(); } requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
 </script>
 </body>
